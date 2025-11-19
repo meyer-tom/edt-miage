@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Chrome driver
+chromedriver
+.wdm/
+
+# HTML debug files
+schedule.html
+
+# macOS
+.DS_Store
+
+# Fichiers locaux (générés par le scraper en local)
+# Le .ics sera committé par le workflow GitHub Actions

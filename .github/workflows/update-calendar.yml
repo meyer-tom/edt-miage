@@ -1,0 +1,55 @@
+name: Update Calendar
+
+on:
+  schedule:
+    # S'exécute tous les jours à 5h UTC (6h Paris heure d'hiver, 7h été)
+    - cron: '0 5 * * *'
+  workflow_dispatch:  # Permet de lancer manuellement depuis GitHub
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  update-calendar:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.11'
+
+    - name: Install Chrome
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y chromium-browser chromium-chromedriver
+
+    - name: Install Python dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run scraper
+      env:
+        SSO_USERNAME: ${{ secrets.SSO_USERNAME }}
+        SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
+      run: |
+        python ade_scraper.py
+
+    - name: Prepare GitHub Pages content
+      run: |
+        mkdir -p gh-pages
+        cp emploi_du_temps.ics gh-pages/
+        echo "Calendrier généré le $(date)" > gh-pages/index.html
+
+    - name: Deploy to GitHub Pages
+      uses: peaceiris/actions-gh-pages@v3
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: gh-pages
+        publish_branch: gh-pages
+        keep_files: false
