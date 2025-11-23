@@ -21,9 +21,14 @@ class ADEPublicScraper:
         options = webdriver.ChromeOptions()
         options.add_argument('--no-sandbox')
         options.add_argument('--disable-dev-shm-usage')
-        options.add_argument('--headless')  # Mode headless pour CI/CD
+        options.add_argument('--headless=new')  # Mode headless pour CI/CD (nouvelle syntaxe)
         options.add_argument('--window-size=1920,1080')
         options.add_argument('--disable-gpu')
+        options.add_argument('--disable-extensions')
+        options.add_argument('--disable-software-rasterizer')
+        options.add_argument('--remote-debugging-port=9222')
+        # User agent pour éviter la détection de bot
+        options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
 
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
@@ -36,8 +41,13 @@ class ADEPublicScraper:
             url = f"{self.base_url}?showTree=true&showPianoDays=true&showPianoWeeks=true&showOptions=false&days=0,1,2,3,4,5&displayConfName=Web&projectId=26&login=anonymous"
             self.driver.get(url)
 
-            # Attendre que la page se charge
-            time.sleep(8)
+            # Attendre que la page se charge (plus long pour CI/CD)
+            print("Attente du chargement de la page (15s)...")
+            time.sleep(15)
+
+            # Debug: afficher le titre de la page
+            print(f"Titre de la page: {self.driver.title}")
+            print(f"URL actuelle: {self.driver.current_url}")
 
             # Séquence de clics pour déplier l'arborescence (clic sur les icônes)
             navigation_path = [
