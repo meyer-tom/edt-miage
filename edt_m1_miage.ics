@@ -1,8 +1,8 @@
 BEGIN:VCALENDAR
 VERSION:2.0
-PRODID:-//UT Capitole Schedule//FR
+PRODID:-//UT Capitole M1 MIAGE FA-ALT//FR
 METHOD:PUBLISH
-X-WR-CALNAME:Emploi du Temps UT Capitole
+X-WR-CALNAME:M1 MIAGE FA-ALT
 X-WR-TIMEZONE:Europe/Paris
 BEGIN:VEVENT
 SUMMARY:CM Bases de données décisionnelles
