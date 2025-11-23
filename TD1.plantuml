@@ -1,0 +1,58 @@
+@startuml TD1
+' LEFT TO RIGHT DIRECTION
+
+class Personne {
+    - numero : int
+    - nom : string
+    - prenom : string
+    - mail : string
+    - num_bureau : string
+
+    +getNumero() : int
+    +getNom() : string
+    +getPrenom() : string
+    +getMail() : string
+    +getNumBureau() : string
+    +setNumbureau(num_bureau : string): void
+}
+
+class Enseignant {
+    +Enseignant(nom : string, prenom : string, mail : string, num_bureau : string)
+}
+
+class Administratif {
+    +Administratif(nom : string, prenom : string, mail : string, num_bureau : string)
+    +evoluer(service : Service) : void
+}
+
+class Composante {
+    -nom : string
+
+    +Composante(nom : string)
+    +getNom() : string
+    +setEnseignantDirigeant(enseignant : Enseignant) : void
+}
+
+class Service {
+    -nom : string
+
+    +Service(nom : string)
+    +getNom() : string
+}
+
+' Enseignant et Administratif héritent de Personne
+Personne "1" <|-- "*" Enseignant : enseignant
+
+' Administratif et Enseignant héritent de Personne
+Personne "1" <|-- "*" Administratif : administratif
+
+' Un enseignant est rattaché à une composante
+Enseignant "*" -- "1" Composante : rattacher
+
+' Une composante a un directeur (qui est un enseignant)
+Composante "1" x--> "1" Enseignant : diriger
+
+' Un service est rattaché à un administratif
+Administratif "1" x--> "*" Service  : évoluer
+
+@enduml

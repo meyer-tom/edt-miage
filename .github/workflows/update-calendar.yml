@@ -33,18 +33,74 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: Run scraper
-      env:
-        SSO_USERNAME: ${{ secrets.SSO_USERNAME }}
-        SSO_PASSWORD: ${{ secrets.SSO_PASSWORD }}
+    - name: Download existing calendar (backup)
+      continue-on-error: true
       run: |
-        python ade_scraper.py
+        # Télécharger l'ancienne version du calendrier comme backup
+        curl -sSL -o edt_backup.ics "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/edt_m1_miage.ics" || echo "Pas de calendrier existant"
+        if [ -f edt_backup.ics ] && [ -s edt_backup.ics ]; then
+          echo "✓ Calendrier existant téléchargé comme backup"
+          echo "BACKUP_EXISTS=true" >> $GITHUB_ENV
+        else
+          echo "⚠ Pas de calendrier existant à sauvegarder"
+          echo "BACKUP_EXISTS=false" >> $GITHUB_ENV
+        fi
+
+    - name: Run public scraper
+      id: scraper
+      continue-on-error: true
+      run: |
+        python ade_public_scraper.py
+        echo "SCRAPER_SUCCESS=true" >> $GITHUB_ENV
+
+    - name: Check scraper result
+      run: |
+        if [ -f edt_m1_miage.ics ] && [ -s edt_m1_miage.ics ]; then
+          EVENT_COUNT=$(grep -c "BEGIN:VEVENT" edt_m1_miage.ics || echo "0")
+          echo "✓ Nouveau calendrier généré avec $EVENT_COUNT événements"
+          if [ "$EVENT_COUNT" -gt "0" ]; then
+            echo "USE_NEW=true" >> $GITHUB_ENV
+          else
+            echo "⚠ Calendrier vide, utilisation du backup"
+            echo "USE_NEW=false" >> $GITHUB_ENV
+          fi
+        else
+          echo "⚠ Scraper a échoué, utilisation du backup"
+          echo "USE_NEW=false" >> $GITHUB_ENV
+        fi
+
+    - name: Use backup if scraper failed
+      if: env.USE_NEW == 'false' && env.BACKUP_EXISTS == 'true'
+      run: |
+        echo "⚠ Utilisation du calendrier de backup"
+        cp edt_backup.ics edt_m1_miage.ics
+
+    - name: Fail if no calendar available
+      if: env.USE_NEW == 'false' && env.BACKUP_EXISTS == 'false'
+      run: |
+        echo "❌ Aucun calendrier disponible (scraper échoué et pas de backup)"
+        exit 1
 
     - name: Prepare GitHub Pages content
       run: |
         mkdir -p gh-pages
-        cp emploi_du_temps.ics gh-pages/
-        echo "Calendrier généré le $(date)" > gh-pages/index.html
+        cp edt_m1_miage.ics gh-pages/
+        cat > gh-pages/index.html << 'EOF'
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <title>M1 MIAGE FA-ALT - Emploi du temps</title>
+          <meta charset="utf-8">
+        </head>
+        <body>
+          <h1>Emploi du temps M1 MIAGE FA-ALT</h1>
+          <p>Dernière mise à jour: $(date '+%Y-%m-%d %H:%M:%S UTC')</p>
+          <p>URL du calendrier: <a href="edt_m1_miage.ics">edt_m1_miage.ics</a></p>
+          <p>Pour ajouter à Apple Calendar ou Google Calendar, utilisez l'URL:</p>
+          <code>https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/edt_m1_miage.ics</code>
+        </body>
+        </html>
+        EOF
 
     - name: Deploy to GitHub Pages
       uses: peaceiris/actions-gh-pages@v3

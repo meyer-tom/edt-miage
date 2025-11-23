@@ -1,0 +1,118 @@
+@startuml TD1
+LEFT TO RIGHT DIRECTION
+
+class Projet {
+    - code : string
+    - dateDebut : date
+    - dateFin : date
+
+    +getCode() : string
+    +getDateDebut() : date
+    +getDateFin() : date
+    +getEtat() : EtatProjet
+    +setEtat(etat : EtatProjet) : void
+    +getDevelopper() : Client
+    +setDevelopper(c : Client) : void
+}
+
+class Client {
+    - raisonSociale : string
+    - rue : string
+    - ville : string
+    - codePostal : string
+    - telephone : string
+    - email : string
+
+    +getRaisonSociale() : string
+    +getRue() : string
+    +getVille() : string
+    +getCodePostal() : string
+    +getTelephone() : string    
+    +getEmail() : string
+}
+
+class EtatProjet {
+    - en_attente
+    - accepte
+    - refuse
+    - en_cours
+    - en_recette
+    - termine
+}
+
+class Salarie {
+    - numero : string
+    - nom : string
+    - prenom : string
+
+    +getNumero() : string
+    +getNom() : string
+    +getPrenom() : string
+}
+
+' Peut crééer un projet
+class Commercial {}
+
+class Chef_de_projet {}
+
+class Equipe {
+    - nom : string
+
+    +getNom() : string
+}
+
+class TypeActivite {
+    - libelle : string
+    - description : string
+
+    +getLibelle() : string
+    +getDescription() : string
+}
+
+class ActiviteRealisee {
+    - nom : string
+
+    +getNom() : string
+}
+
+class Affectation {
+    - tempsPrevue : int
+    - dateDebut : Date
+    - dateFin : Date
+
+    +getTempsPrevue() : int
+    +getDateDebut() : Date
+    +getDateFin() : Date
+}
+
+' Commercial et Chef_de_projet héritent de Salarie
+Salarie "1" <|-- "*" Commercial : commercial
+Salarie "1" <|-- "*" Chef_de_projet : chef_de_projet
+
+Projet "1..*" x--> "1" Client : développer
+Projet x--> "1" EtatProjet : état
+
+' Un commercial peut créer un ou plusieurs projets
+Commercial "1" -- "*" Projet : créer
+
+' Un chef de projet peut être rattaché à un ou plusieurs projets et définit les dates/équipe/activités
+Chef_de_projet "1" -- "*" Projet : gerer
+
+' Un projet est réalisé par une équipe
+Projet "1" -- "1" Equipe : realiser
+
+' Une équipe est composée de plusieurs salariés
+Equipe "1" o-- "*" Salarie : composée
+
+' Un projet comporte plusieurs activités réalisées
+Projet "1" *-- "*" ActiviteRealisee : comporter
+
+' Une activité réalisée est d'un certain type
+ActiviteRealisee "*" -- "1" TypeActivite : est de type
+
+' Affectation : planification d'une activité à un salarié (classe association)
+Salarie "1" -- "*" Affectation
+ActiviteRealisee "1" -- "*" Affectation
+Affectation : planifier
+
+@enduml
