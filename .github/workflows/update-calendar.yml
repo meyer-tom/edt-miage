@@ -1,9 +1,9 @@
 name: Update Calendar
 
 on:
-  #schedule:
+  schedule:
     # S'exécute tous les jours à 5h UTC (6h Paris heure d'hiver, 7h été)
-    #- cron: '0 5 * * *'
+    - cron: '0 5 * * *'
   workflow_dispatch:  # Permet de lancer manuellement depuis GitHub
 
 permissions:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   update-calendar:
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
 
     steps:
     - name: Checkout repository
