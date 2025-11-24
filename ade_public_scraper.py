@@ -49,6 +49,36 @@ class ADEPublicScraper:
             print(f"Titre de la page: {self.driver.title}")
             print(f"URL actuelle: {self.driver.current_url}")
 
+            # Forcer le rendu GWT dès le chargement (important pour Docker/headless)
+            print("Forçage du rendu GWT...")
+            try:
+                # Déclencher un resize pour forcer GWT à rendre l'arbre
+                self.driver.execute_script("window.dispatchEvent(new Event('resize'));")
+                time.sleep(1)
+
+                # Resize de la fenêtre (simule F12)
+                current_size = self.driver.get_window_size()
+                print(f"  Resize fenêtre: {current_size['width']}x{current_size['height']}")
+                self.driver.set_window_size(current_size['width'] - 50, current_size['height'])
+                time.sleep(0.5)
+                self.driver.set_window_size(current_size['width'], current_size['height'])
+                time.sleep(2)
+
+                # Debug: lister les éléments visibles dans l'arbre
+                tree_elements = self.driver.find_elements(By.CSS_SELECTOR, ".x-tree3-node-text, .x-grid3-cell-inner")
+                print(f"  Éléments d'arbre trouvés: {len(tree_elements)}")
+                if tree_elements:
+                    sample = [e.text.strip() for e in tree_elements[:5] if e.text.strip()]
+                    print(f"  Exemples: {sample}")
+                else:
+                    # Essayer d'autres sélecteurs
+                    all_spans = self.driver.find_elements(By.TAG_NAME, "span")
+                    texts = [s.text.strip() for s in all_spans if s.text.strip() and len(s.text.strip()) < 50][:10]
+                    print(f"  Spans trouvés ({len(all_spans)}): {texts}")
+
+            except Exception as e:
+                print(f"  ⚠ Erreur lors du forçage GWT: {e}")
+
             # Séquence de clics pour déplier l'arborescence (clic sur les icônes)
             navigation_path = [
                 "Groupes d'étudiants",
