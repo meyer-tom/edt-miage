@@ -57,6 +57,14 @@ jobs:
         python ade_public_scraper.py
         echo "SCRAPER_SUCCESS=true" >> $GITHUB_ENV
 
+    - name: Upload debug screenshot
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: debug-screenshot
+        path: debug_screenshot.png
+        if-no-files-found: ignore
+
     - name: Check scraper result
       run: |
         if [ -f edt_m1_miage.ics ] && [ -s edt_m1_miage.ics ]; then

@@ -29,6 +29,9 @@ class ADEPublicScraper:
         options.add_argument('--remote-debugging-port=9222')
         # User agent pour éviter la détection de bot
         options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        # Forcer la langue française
+        options.add_argument('--lang=fr-FR')
+        options.add_experimental_option('prefs', {'intl.accept_languages': 'fr-FR,fr'})
 
         self.driver = webdriver.Chrome(service=Service(ChromeDriverManager().install()), options=options)
 
@@ -75,6 +78,11 @@ class ADEPublicScraper:
                     all_spans = self.driver.find_elements(By.TAG_NAME, "span")
                     texts = [s.text.strip() for s in all_spans if s.text.strip() and len(s.text.strip()) < 50][:10]
                     print(f"  Spans trouvés ({len(all_spans)}): {texts}")
+
+                # Sauvegarder une capture d'écran pour debug
+                screenshot_path = "debug_screenshot.png"
+                self.driver.save_screenshot(screenshot_path)
+                print(f"  📸 Capture d'écran sauvegardée: {screenshot_path}")
 
             except Exception as e:
                 print(f"  ⚠ Erreur lors du forçage GWT: {e}")
